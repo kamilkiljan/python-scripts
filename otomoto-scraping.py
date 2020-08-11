@@ -33,7 +33,7 @@ class Offer:
     subregion_id_pattern = re.compile("var subregion_id='([0-9]*)';")
     city_id_pattern = re.compile("var city_id='([0-9]*)';")
     user_date_pattern = re.compile('Sprzedający na OTOMOTO od (20[0-9]{2})')
-    lat_lon_pattern = re.compile('Current+Location/(?P<lat>[0-9]{,2}\.[0-9]{,8}),(?P<lon>[0-9]{,2}\.[0-9]{,8})')
+    lat_lon_pattern = re.compile('Current\+Location/(?P<lat>[0-9]{,2}\.[0-9]+),(?P<lon>[0-9]{,2}\.[0-9]{,8})')
     params_mapping = {
         'Oferta od': 'seller_type',
         'Kategoria': 'category',
@@ -145,7 +145,6 @@ class Offer:
     # resource data
     url: str
     url_import_date: date
-    url_expired_date: date = None
     id_: str = None
     # price
     estimation: str = 'none'
@@ -170,93 +169,93 @@ class Offer:
     doors: int = None
     seats: int = None
     color: str = None
-    acrylic: bool = None
-    metallic: bool = None
-    pearl: bool = None
-    financing_available: bool = None
-    leasing: bool = None
+    acrylic: bool = False
+    metallic: bool = False
+    pearl: bool = False
+    financing_available: bool = False
+    leasing: bool = False
     leasing_rental_price: str = None
     dealer_guarantee_months: int = None
     dealer_guarantee_kms: int = None
     producer_guarantee: str = None
-    vat_invoice: bool = None
+    vat_invoice: bool = False
     country_of_origin: str = None
     registration_number: str = None
     first_registered_year: int = None
-    registered_in_poland: bool = None
-    first_owner: bool = None
-    accident_free: bool = None
-    damaged: bool = None
-    aso_serviced: bool = None
+    registered_in_poland: bool = False
+    first_owner: bool = False
+    accident_free: bool = False
+    damaged: bool = False
+    aso_serviced: bool = False
     condition: str = None
     # user data
     user_date: str = None
     user_name: str = None
     # features
-    abs: bool = None
-    cd: bool = None
-    central_lock: bool = None
-    el_front_windows: bool = None
-    el_side_mirrors: bool = None
-    immobilizer: bool = None
-    radio_factory: bool = None
-    power_steering: bool = None
-    alarm: bool = None
-    alu_rims: bool = None
-    asr: bool = None
-    parking_assistant: bool = None
-    lane_assistant: bool = None
-    bluetooth: bool = None
-    rain_sensor: bool = None
-    blind_field_sensor: bool = None
-    nightfall_sensor: bool = None
-    parking_sensors_front: bool = None
-    pparking_sensors_rear: bool = None
-    panoramic_roof: bool = None
-    el_chromatic_side_mirrors: bool = None
-    el_chromatic_rear_mirror: bool = None
-    el_rear_windows: bool = None
-    el_adjusted_seats: bool = None
-    esp: bool = None
-    aus_socket: bool = None
-    sd_socket: bool = None
-    usb_socket: bool = None
-    hook: bool = None
-    hud: bool = None
-    isofix: bool = None
-    reverse_camera: bool = None
-    ac_auto: bool = None
-    ac_four_zones: bool = None
-    ac_two_zones: bool = None
-    ac_manual: bool = None
-    computer: bool = None
-    transmission_paddles: bool = None
-    mp3: bool = None
-    gps: bool = None
-    dvd: bool = None
-    speed_limiter: bool = None
-    stand_by_heating: bool = None
-    heated_windshield: bool = None
-    heated_side_mirrors: bool = None
-    heated_front_seats: bool = None
-    heated_rear_seats: bool = None
-    tinted_windows: bool = None
-    radio_non_factory: bool = None
-    adjusted_suspension: bool = None
-    roof_railings: bool = None
-    start_stop_system: bool = None
-    sliding_roof: bool = None
-    lights_daylight: bool = None
-    lights_led: bool = None
-    lights_fog_lamps: bool = None
-    lights_xenon: bool = None
-    upholstery_leather: bool = None
-    upholstery_velour: bool = None
-    autocruise_manual: bool = None
-    autocruise_active: bool = None
-    tv_tuner: bool = None
-    multifunctional_steering_wheel: bool = None
-    cd_changer: bool = None
+    abs: bool = False
+    cd: bool = False
+    central_lock: bool = False
+    el_front_windows: bool = False
+    el_side_mirrors: bool = False
+    immobilizer: bool = False
+    radio_factory: bool = False
+    power_steering: bool = False
+    alarm: bool = False
+    alu_rims: bool = False
+    asr: bool = False
+    parking_assistant: bool = False
+    lane_assistant: bool = False
+    bluetooth: bool = False
+    rain_sensor: bool = False
+    blind_field_sensor: bool = False
+    nightfall_sensor: bool = False
+    parking_sensors_front: bool = False
+    pparking_sensors_rear: bool = False
+    panoramic_roof: bool = False
+    el_chromatic_side_mirrors: bool = False
+    el_chromatic_rear_mirror: bool = False
+    el_rear_windows: bool = False
+    el_adjusted_seats: bool = False
+    esp: bool = False
+    aus_socket: bool = False
+    sd_socket: bool = False
+    usb_socket: bool = False
+    hook: bool = False
+    hud: bool = False
+    isofix: bool = False
+    reverse_camera: bool = False
+    ac_auto: bool = False
+    ac_four_zones: bool = False
+    ac_two_zones: bool = False
+    ac_manual: bool = False
+    computer: bool = False
+    transmission_paddles: bool = False
+    mp3: bool = False
+    gps: bool = False
+    dvd: bool = False
+    speed_limiter: bool = False
+    stand_by_heating: bool = False
+    heated_windshield: bool = False
+    heated_side_mirrors: bool = False
+    heated_front_seats: bool = False
+    heated_rear_seats: bool = False
+    tinted_windows: bool = False
+    radio_non_factory: bool = False
+    adjusted_suspension: bool = False
+    roof_railings: bool = False
+    start_stop_system: bool = False
+    sliding_roof: bool = False
+    lights_daylight: bool = False
+    lights_led: bool = False
+    lights_fog_lamps: bool = False
+    lights_xenon: bool = False
+    upholstery_leather: bool = False
+    upholstery_velour: bool = False
+    autocruise_manual: bool = False
+    autocruise_active: bool = False
+    tv_tuner: bool = False
+    multifunctional_steering_wheel: bool = False
+    cd_changer: bool = False
     # other
     description: str = None
     location: str = None
@@ -265,6 +264,9 @@ class Offer:
     city_id: int = None
     photos: int = None
     publish_date: date = None
+    # geo
+    lat: float = None
+    lon: float = None
 
     def import_offer(self):
         """Import data from the offer's URL"""
@@ -283,7 +285,7 @@ class Offer:
                 self.estimation = re.findall(self.offer_est_pattern, content)[0]
             else:
                 self.estimation = 'none'
-            self.price = extract_string(soup, 'span', 'offer-price__number')
+            self.price = int(extract_string(soup, 'span', 'offer-price__number').replace(' ', ''))
             self.currency = extract_string(soup, 'span', 'offer-price__currency')
             if soup.find('div', class_='offer-features__row'):
                 features = tuple(soup.find('div', class_='offer-features__row').stripped_strings)
@@ -299,11 +301,19 @@ class Offer:
                 self.photos = int(''.join(tuple(soup.find('button', class_='gallery-images-counter').stripped_strings)).split('/')[1])
             self.user_date = re.findall(self.user_date_pattern, content)[0]
             self.user_name = extract_string(soup, 'h2', 'seller-box__seller-name')
+            lat_lon = re.search(self.lat_lon_pattern, content)
+            self.lat, self.lon = float(lat_lon['lat']), float(lat_lon['lon'])
 
             # Params and features parsing
             params = dict([tuple(item.stripped_strings) for item in soup.find_all('li', class_='offer-params__item')])
             for param in params:
-                if param in self.params_mapping:
+                if param == 'Przebieg':
+                    self.mileage = int(''.join([c for c in params[param] if c.is_digit()]))
+                elif param == 'Moc':
+                    self.power = int(''.join([c for c in params[param] if c.is_digit()]))
+                elif param == 'Pojemność skokowa':
+                    self.engine_displacement = int(''.join([c for c in params[param] if c.is_digit()]))
+                elif param in self.params_mapping:
                     self.__setattr__(self.params_mapping[param], params[param])
                 elif param in self.bool_params_mapping:
                     self.__setattr__(self.bool_params_mapping[param], True)
@@ -311,12 +321,8 @@ class Offer:
         except Exception as e:
             pass
 
-    def update_offer(self):
-        """Check if the offer URL still links to valid offer"""
-        ...
 
-
-def import_list_of_offers(offers, brands=DEFAULT_BRANDS, regions=ALL_REGIONS):
+def import_list_of_offers(offers, brands, regions):
     item_url_pattern = re.compile('href="https://www.otomoto.pl/oferta/(.+?).html')
 
     existing_urls = set(offer.url for offer in offers)
@@ -346,8 +352,9 @@ def import_list_of_offers(offers, brands=DEFAULT_BRANDS, regions=ALL_REGIONS):
     offers.extend(new_offers)
     return offers
 
+
 if __name__ == '__main__':
-    offers = import_list_of_offers([])
+    offers = import_list_of_offers([], brands=DEFAULT_BRANDS, regions=ALL_REGIONS)
     for offer in offers:
         offer.import_offer()
     df = pd.DataFrame([asdict(offer) for offer in offers])

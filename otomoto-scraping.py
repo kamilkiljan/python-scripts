@@ -1,5 +1,5 @@
 from dataclasses import asdict, dataclass
-from datetime import date
+from datetime import date, datetime
 import re
 
 from bs4 import BeautifulSoup
@@ -33,7 +33,7 @@ class Offer:
     subregion_id_pattern = re.compile("var subregion_id='([0-9]*)';")
     city_id_pattern = re.compile("var city_id='([0-9]*)';")
     user_date_pattern = re.compile('Sprzedający na OTOMOTO od (20[0-9]{2})')
-    lat_lon_pattern = re.compile('Current\+Location/(?P<lat>[0-9]{,2}\.[0-9]+),(?P<lon>[0-9]{,2}\.[0-9]{,8})')
+    lat_lon_pattern = re.compile('id="adMapData"\s*data-map-lat="(?P<lat>[0-9]{,2}\.[0-9]+)"\s*data-map-lon="(?P<lon>[0-9]{,2}\.[0-9]{,8})"')
     params_mapping = {
         'Oferta od': 'seller_type',
         'Kategoria': 'category',
@@ -189,7 +189,7 @@ class Offer:
     aso_serviced: bool = False
     condition: str = None
     # user data
-    user_date: str = None
+    user_date: int = None
     user_name: str = None
     # features
     abs: bool = False
@@ -271,7 +271,6 @@ class Offer:
     def import_offer(self):
         """Import data from the offer's URL"""
         full_url = f"https://www.otomoto.pl/oferta/{self.url}.html"
-        print(full_url)
         try:
             r = s.get(full_url)
             if r.status_code != 200:
@@ -292,33 +291,36 @@ class Offer:
                 for feature in features:
                     if feature in self.features_mapping:
                         self.__setattr__(self.features_mapping[feature], True)
-            self.description = extract_string(soup, 'div', 'offer-description__description')
+            if soup.find('div', class_='offer-description__description'):
+                self.description = '\n'.join([s for s in soup.find('div', class_='offer-description__description').stripped_strings])
             self.location = extract_string(soup, 'span', 'seller-box__seller-address__label')
             self.region_id = re.findall(self.region_id_pattern, content)[0]
             self.subregion_id = re.findall(self.subregion_id_pattern, content)[0]
             self.city_id = re.findall(self.city_id_pattern, content)[0]
             if soup.find('button', class_='gallery-images-counter'):
                 self.photos = int(''.join(tuple(soup.find('button', class_='gallery-images-counter').stripped_strings)).split('/')[1])
-            self.user_date = re.findall(self.user_date_pattern, content)[0]
+            self.user_date = int(re.findall(self.user_date_pattern, content)[0])
             self.user_name = extract_string(soup, 'h2', 'seller-box__seller-name')
             lat_lon = re.search(self.lat_lon_pattern, content)
-            self.lat, self.lon = float(lat_lon['lat']), float(lat_lon['lon'])
+            if lat_lon:
+                self.lat, self.lon = float(lat_lon['lat']), float(lat_lon['lon'])
 
             # Params and features parsing
             params = dict([tuple(item.stripped_strings) for item in soup.find_all('li', class_='offer-params__item')])
             for param in params:
                 if param == 'Przebieg':
-                    self.mileage = int(''.join([c for c in params[param] if c.is_digit()]))
+                    self.mileage = int(''.join([c for c in params[param] if c.isdigit()]))
                 elif param == 'Moc':
-                    self.power = int(''.join([c for c in params[param] if c.is_digit()]))
+                    self.power = int(''.join([c for c in params[param] if c.isdigit()]))
                 elif param == 'Pojemność skokowa':
-                    self.engine_displacement = int(''.join([c for c in params[param] if c.is_digit()]))
+                    self.engine_displacement = int(''.join([c for c in params[param] if c.isdigit()]))
                 elif param in self.params_mapping:
                     self.__setattr__(self.params_mapping[param], params[param])
                 elif param in self.bool_params_mapping:
                     self.__setattr__(self.bool_params_mapping[param], True)
 
         except Exception as e:
+            raise e
             pass
 
 
@@ -355,8 +357,17 @@ def import_list_of_offers(offers, brands, regions):
 
 if __name__ == '__main__':
     offers = import_list_of_offers([], brands=DEFAULT_BRANDS, regions=ALL_REGIONS)
+    counter = 0
+    start = datetime.now()
     for offer in offers:
         offer.import_offer()
+        counter += 1
+        if not counter % 100:
+            now = datetime.now()
+            elapsed = (now-start).total_seconds()
+            print(f"Imported {counter}/{len(offers)} offers. "
+                  f"Time elapsed: {elapsed/60:.0f} minutes. "
+                  f"Estimated time left: {counter/elapsed*(len(offers)-counter)/60:.0f} minutes.")
     df = pd.DataFrame([asdict(offer) for offer in offers])
     df.to_csv('offers.tsv', sep='\t')
     pass

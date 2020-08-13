@@ -14,7 +14,7 @@ s.mount('https://', HTTPAdapter(max_retries=3))
 DEFAULT_BRANDS = ('volkswagen', 'opel', 'ford', 'audi', 'bmw', 'mercedes-benz', 'toyota', 'renault', 'skoda',
                   'honda', 'kia', 'mazda', 'peugeot')
 ALL_REGIONS = ('mazowieckie', 'wielkopolskie', 'slaskie', 'dolnoslaskie', 'malopolskie', 'pomorskie', 'lodzkie',
-               'kujawsko-pomorskie', 'zachodniopomorskie', 'lubuskie', 'lubelskie', 'swietokrzyskie', 'podkrapackie',
+               'kujawsko-pomorskie', 'zachodniopomorskie', 'lubuskie', 'lubelskie', 'swietokrzyskie', 'podkarpackie',
                'opolskie', 'warminsko-mazurskie', 'podlaskie')
 
 
@@ -320,7 +320,6 @@ class Offer:
                     self.__setattr__(self.bool_params_mapping[param], True)
 
         except Exception as e:
-            raise e
             pass
 
 

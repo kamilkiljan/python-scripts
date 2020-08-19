@@ -1,6 +1,7 @@
 from dataclasses import asdict, dataclass
 from datetime import date, datetime
 import re
+import os
 
 from bs4 import BeautifulSoup
 import pandas as pd
@@ -28,6 +29,7 @@ def extract_string(soup, html_element, class_):
 
 @dataclass
 class Offer:
+    """Represents single offer published on otomoto site"""
     offer_est_pattern = re.compile('"price_prediction_indicator":"(none|below|in|above)"')
     region_id_pattern = re.compile("var region_id='([0-9]*)';")
     subregion_id_pattern = re.compile("var subregion_id='([0-9]*)';")
@@ -269,7 +271,7 @@ class Offer:
     lon: float = None
 
     def import_offer(self):
-        """Import data from the offer's URL"""
+        """Imports data from the offer's URL"""
         full_url = f"https://www.otomoto.pl/oferta/{self.url}.html"
         try:
             r = s.get(full_url)
@@ -323,7 +325,8 @@ class Offer:
             pass
 
 
-def import_list_of_offers(offers, brands, regions):
+def import_list_of_offers(offers, brands, regions) -> [Offer]:
+    """Imports list of offers from otomoto site"""
     item_url_pattern = re.compile('href="https://www.otomoto.pl/oferta/(.+?).html')
 
     existing_urls = set(offer.url for offer in offers)
@@ -354,19 +357,34 @@ def import_list_of_offers(offers, brands, regions):
     return offers
 
 
-if __name__ == '__main__':
-    offers = import_list_of_offers([], brands=DEFAULT_BRANDS, regions=ALL_REGIONS)
+def import_offers_from_working_directory() -> [Offer]:
+    """Imports list of offers from the latest file in the working directory"""
+    latest_file = sorted(
+        [f for f in os.listdir('.') if os.path.isfile(f) and re.match(r'^offers_[0-9]{12}\.tsv$', f)])[-1]
+    offers_df = pd.read_csv(latest_file, sep='\t').drop(columns=['Unnamed: 0'], errors='ignore')
+    offers_df = offers_df[offers_df['id_'].notna()]  # drop records which could not been imported previously
+    return [Offer(**record) for _, record in offers_df.iterrows()]
+
+
+def main():
+    offers = import_offers_from_working_directory()
+    offers = import_list_of_offers(offers, brands=DEFAULT_BRANDS, regions=ALL_REGIONS)
     counter = 0
     start = datetime.now()
     for offer in offers:
-        offer.import_offer()
+        if offer.id_ is None:  # check if offer has already been imported
+            offer.import_offer()
         counter += 1
         if not counter % 100:
             now = datetime.now()
-            elapsed = (now-start).total_seconds()
+            elapsed = (now - start).total_seconds()
             print(f"Imported {counter}/{len(offers)} offers. "
-                  f"Time elapsed: {elapsed/60:.0f} minutes. "
-                  f"Estimated time left: {counter/elapsed*(len(offers)-counter)/60:.0f} minutes.")
+                  f"Time elapsed: {elapsed / 60:.0f} minutes. "
+                  f"Estimated time left: {elapsed / counter * (len(offers) - counter) / 60:.0f} minutes.")
     df = pd.DataFrame([asdict(offer) for offer in offers])
-    df.to_csv('offers.tsv', sep='\t')
+    df.to_csv(f"offers_{datetime.now().strftime('%Y%m%d%H%M')}.tsv", index=False, sep='\t')
     pass
+
+
+if __name__ == '__main__':
+    main()
